@@ -1,11 +1,9 @@
-#require 'digest/sha1'
-
 module IosBackupExtractor
   class MBDB
     include NauktisUtils::Logging
 
     def initialize(manifest_location)
-      parse(Utils::FileBrowser.ensure_valid_file(manifest_location))
+      parse(NauktisUtils::FileBrowser.ensure_valid_file(manifest_location))
     end
 
     def files
@@ -45,7 +43,7 @@ module IosBackupExtractor
       @data = File.open(filename, 'rb') { |f| f.read }
       @offset = 0
       raise 'This does not look like an MBDB file' if @data[0...4] != 'mbdb'
-      logger.debug('Manifest Parser') {"Manifest size: #{@data.size}"}
+      logger.debug('Manifest Parser') {"Manifest size: #{@data.size.to_s(:delimited)}"}
       @offset = 6 # We skip the header mbdb\5\0
       # Actual parsing
       while @offset < @data.size

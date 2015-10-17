@@ -1,6 +1,10 @@
 require 'fileutils'
+require 'digest/sha1'
+
 require "nauktis_utils"
 require 'cfpropertylist'
+require 'activesupport'
+
 require "ios_backup_extractor/version"
 require "ios_backup_extractor/mbdb"
 require "ios_backup_extractor/raw_backup"
