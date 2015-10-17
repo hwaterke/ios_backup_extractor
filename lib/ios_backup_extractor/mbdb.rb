@@ -7,7 +7,7 @@ module IosBackupExtractor
     end
 
     def files
-      @mbdb
+      @files
     end
 
     private
@@ -39,11 +39,11 @@ module IosBackupExtractor
     # Parse the manifest file
     def parse(filename)
       # Set-up
-      @mbdb = Array.new
+      @files = Array.new
+      @total_size = 0
       @data = File.open(filename, 'rb') { |f| f.read }
       @offset = 0
       raise 'This does not look like an MBDB file' if @data[0...4] != 'mbdb'
-      logger.debug('Manifest Parser') {"Manifest size: #{@data.size.to_s(:delimited)}"}
       @offset = 6 # We skip the header mbdb\5\0
       # Actual parsing
       while @offset < @data.size
@@ -78,9 +78,11 @@ module IosBackupExtractor
         fullpath = info[:domain] + '-' + info[:file_path]
         info[:file_id] = Digest::SHA1.hexdigest(fullpath)
         # We add the file to the list of files.
-        @mbdb << info
+        @files << info
+        # We accumulate the total size
+        @total_size += info[:file_size]
       end
-      logger.debug('Manifest Parser') {"#{@mbdb.size} entries in the Manifest"}
+      logger.debug('Manifest Parser') {"#{IosBackupExtractor.thousand_separator(@files.size)} entries in the Manifest. Total size: #{IosBackupExtractor.thousand_separator(@total_size)} bytes."}
     end  
   end
 end

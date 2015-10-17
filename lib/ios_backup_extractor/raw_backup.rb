@@ -1,23 +1,28 @@
 module IosBackupExtractor
   class RawBackup
+    include NauktisUtils::Logging
     INFO_PLIST = 'Info.plist'
     MANIFEST_PLIST = 'Manifest.plist'
-    MANIFEST_MBDB = 'Manifest.mbdb'
 
     def initialize(backup_directory)
       @backup_directory = NauktisUtils::FileBrowser.ensure_valid_directory(backup_directory)
-      
-      @manifest_plist = IosBackupExtractor.plist_to_hash(File.join(@backup_directory, MANIFEST_PLIST))
       @info_plist = IosBackupExtractor.plist_to_hash(File.join(@backup_directory, INFO_PLIST))
-      
+      @manifest_plist = IosBackupExtractor.plist_to_hash(File.join(@backup_directory, MANIFEST_PLIST))
       print_info
-      puts @manifest_plist["IsEncrypted"]? "Backup is encrypted." : "Backup is not encrypted."
-
-      raise "This looks like a very old backup (iOS 3?)" unless @manifest_plist.has_key? 'BackupKeyBag'
-
-      mbdb = MBDB.new(File.join(@backup_directory, MANIFEST_MBDB))
     end
 
+    def extract_to(destination_directory, options = {})
+      options = {name: 'full'}.merge(options)
+      destination_directory = NauktisUtils::FileBrowser.ensure_valid_directory(destination_directory)
+      backup_name = NauktisUtils::FileBrowser.sanitize_name("#{@info_plist['Last Backup Date'].strftime('%Y_%m_%d')}_#{@info_plist['Product Type']}_iOS#{@info_plist['Product Version']}_#{@info_plist['Serial Number']}_#{options[:name]}")
+      parent_directory = File.expand_path(File.join(destination_directory, backup_name))
+      FileUtils.mkdir(parent_directory)
+      logger.info(self.class.name) { "Starting backup in temporary directory #{parent_directory}" }
+      do_extract_to(parent_directory, options)
+      parent_directory
+    end
+
+    private
     def print_info
       ["Device Name", "Display Name", "Last Backup Date", "IMEI", "Serial Number", "Product Type", "Product Version", "iTunes Version"].each do |i|
         puts "#{i}: #{@info_plist[i]}"
