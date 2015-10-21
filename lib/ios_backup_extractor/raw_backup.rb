@@ -8,7 +8,6 @@ module IosBackupExtractor
       @backup_directory = NauktisUtils::FileBrowser.ensure_valid_directory(backup_directory)
       @info_plist = IosBackupExtractor.plist_to_hash(File.join(@backup_directory, INFO_PLIST))
       @manifest_plist = IosBackupExtractor.plist_to_hash(File.join(@backup_directory, MANIFEST_PLIST))
-      print_info
     end
 
     def extract_to(destination_directory, options = {})
@@ -35,7 +34,6 @@ module IosBackupExtractor
       end
     end
 
-    private
     def print_info
       ["Device Name", "Display Name", "Last Backup Date", "IMEI", "Serial Number", "Product Type", "Product Version", "iTunes Version"].each do |i|
         puts "#{i}: #{@info_plist[i]}"

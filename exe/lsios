@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'ios_backup_extractor'
+
+NauktisUtils::Logging.logger.level = Logger::WARN
+IosBackupExtractor::BackupRetriever.new().search('.').backups.each do |backup|
+  backup.print_info
+  puts '-' * 20
+end
