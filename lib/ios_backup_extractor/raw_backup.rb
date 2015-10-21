@@ -25,7 +25,7 @@ module IosBackupExtractor
       Dir.mktmpdir(nil, options[:temp_folder]) do |dir|
         parent_folder = extract_to(dir, options)
         logger.debug(self.class.name) { "Starting archiving of #{parent_folder}" }
-        Archiver.new do
+        NauktisUtils::Archiver.new do
           add(parent_folder)
           destination(destination_directory)
           name(File.basename(parent_folder))
