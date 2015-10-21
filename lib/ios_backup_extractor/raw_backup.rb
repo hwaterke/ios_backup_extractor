@@ -39,5 +39,9 @@ module IosBackupExtractor
         puts "#{i}: #{@info_plist[i]}"
       end
     end
+
+    def to_s
+      "#{@info_plist['Last Backup Date']} - #{@info_plist['Device Name']} - #{@info_plist['Serial Number']} (#{@info_plist['Product Type']} iOS #{@info_plist['Product Version']})"
+    end
   end
 end

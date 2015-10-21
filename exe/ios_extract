@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require 'ios_backup_extractor'
+
+NauktisUtils::Logging.logger.level = Logger::WARN
+backups = IosBackupExtractor::BackupRetriever.new().search.backups
+
+if backups.empty?
+  puts "No backup found."
+else
+  puts "Which backup to export?"
+  backups.each_with_index do |b, index|
+    puts "[#{index}] - #{b}"
+  end
+  s = gets.chomp.to_i
+  backups[s].archive_to(File.join(ENV['HOME'], 'Desktop'))
+end
