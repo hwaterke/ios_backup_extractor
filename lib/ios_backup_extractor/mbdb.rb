@@ -82,7 +82,7 @@ module IosBackupExtractor
         # We accumulate the total size
         @total_size += info[:file_size]
       end
-      logger.debug('Manifest Parser') {"#{IosBackupExtractor.thousand_separator(@files.size)} entries in the Manifest. Total size: #{IosBackupExtractor.thousand_separator(@total_size)} bytes."}
+      logger.debug('Manifest Parser') {"#{@files.size.to_s(:delimited)} entries in the Manifest. Total size: #{@total_size.to_s(:human_size)}."}
     end  
   end
 end

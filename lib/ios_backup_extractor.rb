@@ -1,8 +1,10 @@
-require 'fileutils'
 require 'digest/sha1'
+require 'fileutils'
 
-require "nauktis_utils"
+require 'active_support'
+require 'active_support/core_ext/numeric'
 require 'cfpropertylist'
+require "nauktis_utils"
 
 require "ios_backup_extractor/version"
 require "ios_backup_extractor/mbdb"
@@ -14,9 +16,5 @@ module IosBackupExtractor
   def self.plist_to_hash(file)
     file = NauktisUtils::FileBrowser.ensure_valid_file(file)
     CFPropertyList.native_types(CFPropertyList::List.new(:file => file).value)
-  end
-
-  def self.thousand_separator(number)
-    number.to_s.reverse.gsub(/...(?=.)/,'\&,').reverse
   end
 end
