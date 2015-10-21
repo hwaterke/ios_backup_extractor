@@ -4,7 +4,7 @@ module IosBackupExtractor
 
     def initialize(backup_directory)
       super(backup_directory)
-      puts @manifest_plist["IsEncrypted"]? "Backup is encrypted." : "Backup is not encrypted."
+      logger.info "Backup encrypted: #{@manifest_plist["IsEncrypted"]}"
       raise "This looks like a very old backup (iOS 3?)" unless @manifest_plist.has_key? 'BackupKeyBag'
       @mbdb = MBDB.new(File.join(@backup_directory, MANIFEST_MBDB))
     end
