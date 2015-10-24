@@ -8,6 +8,7 @@ require "nauktis_utils"
 
 require "ios_backup_extractor/version"
 require "ios_backup_extractor/mbdb"
+require "ios_backup_extractor/keybag"
 require "ios_backup_extractor/raw_backup"
 require "ios_backup_extractor/raw_backup4"
 require "ios_backup_extractor/backup_retriever"

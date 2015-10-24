@@ -7,6 +7,8 @@ module IosBackupExtractor
       logger.info "Backup encrypted: #{@manifest_plist["IsEncrypted"]}"
       raise "This looks like a very old backup (iOS 3?)" unless @manifest_plist.has_key? 'BackupKeyBag'
       @mbdb = MBDB.new(File.join(@backup_directory, MANIFEST_MBDB))
+
+      Keybag.createWithBackupManifest(@manifest_plist, nil)
     end
 
     private
