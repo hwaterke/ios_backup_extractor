@@ -3,6 +3,7 @@ require 'fileutils'
 
 require 'active_support'
 require 'active_support/core_ext/numeric'
+require 'aes_key_wrap'
 require 'cfpropertylist'
 require "nauktis_utils"
 
