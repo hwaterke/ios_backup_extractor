@@ -4,11 +4,14 @@ module IosBackupExtractor
 
     def initialize(backup_directory)
       super(backup_directory)
-      logger.info "Backup encrypted: #{@manifest_plist["IsEncrypted"]}"
-      raise "This looks like a very old backup (iOS 3?)" unless @manifest_plist.has_key? 'BackupKeyBag'
-      @mbdb = MBDB.new(File.join(@backup_directory, MANIFEST_MBDB))
 
-      Keybag.createWithBackupManifest(@manifest_plist, nil)
+      raise "This looks like a very old backup (iOS 3?)" unless @manifest_plist.has_key? 'BackupKeyBag'
+      if @manifest_plist["IsEncrypted"]
+        logger.info "Encrypted backup"
+        @keybag = Keybag.createWithBackupManifest(@manifest_plist, 'test')
+      end
+
+      @mbdb = MBDB.new(File.join(@backup_directory, MANIFEST_MBDB))
     end
 
     private
@@ -37,7 +40,25 @@ module IosBackupExtractor
 
           logger.debug(self.class.name) {"Extracting #{destination}"}
           FileUtils.mkdir_p(File.dirname(destination))
-          FileUtils.cp(source, destination)
+
+          if not f[:encryption_key].nil? and not @keybag.nil?
+            key = @keybag.unwrapKeyForClass(f[:protection_class], f[:encryption_key][4..-1])
+
+            cipher = OpenSSL::Cipher::AES256.new(:CBC)
+            cipher.decrypt
+            cipher.key = key
+            buf = ""
+            File.open(destination, "wb") do |outf|
+              File.open(source, "rb") do |inf|
+                while inf.read(4096, buf)
+                  outf << cipher.update(buf)
+                end
+                outf << cipher.final
+              end
+            end
+          else
+            FileUtils.cp(source, destination)
+          end
         end
       end
     end
