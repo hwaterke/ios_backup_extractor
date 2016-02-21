@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require 'ios_backup_extractor'
+
+NauktisUtils::Logging.logger.level = Logger::WARN
+backups = IosBackupExtractor::BackupRetriever.new().search.backups
+
+configuration = {}
+configuration[:host] = 'hostname'
+configuration[:username] = 'username'
+configuration[:password] = 'password'
+
+configuration[:last_backup] = {}
+backups.each do |b|
+  # When is the last time we backed up that device?
+  last_backup = configuration[:last_backup][b.info_plist[Serial Number]]
+  if last_backup.nil? or b.info_plist['Last Backup Date'] > last_backup
+    puts "New: #{b}"
+
+    p b.archive_to(File.join(ENV['HOME'], 'Desktop'))
+
+    # Save date and config
+  else
+    puts "Already done: #{b}"
+  end
+end

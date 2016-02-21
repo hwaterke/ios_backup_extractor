@@ -1,6 +1,7 @@
 module IosBackupExtractor
   class RawBackup
     include NauktisUtils::Logging
+    attr_reader :info_plist
     INFO_PLIST = 'Info.plist'
     MANIFEST_PLIST = 'Manifest.plist'
 
