@@ -1,0 +1,107 @@
+#!/usr/bin/env ruby
+
+require 'ios_backup_extractor'
+require 'optparse'
+
+NauktisUtils::Logging.logger.level = Logger::WARN
+retreiver = IosBackupExtractor::BackupRetriever.new
+
+options = {}
+backup_options = {}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: ios [options] [location]'
+  opts.separator 'If location is not provided, the default backup location will be searched'
+
+  opts.separator ''
+  opts.separator 'Operations:'
+
+  opts.on('-l', '--list', 'Prints a list of backups') do
+    options[:operation] = :list
+  end
+
+  opts.on('-d', '--detail', 'Prints a detailed list of backups') do
+    options[:operation] = :details
+  end
+
+  opts.on('--archive DESTINATION', 'Archives (tar) backups to specified destination') do |q|
+    options[:operation] = :archive
+    dest = File.expand_path(q)
+    raise "#{dest} does not exist" unless File.directory?(dest)
+    options[:destination] = dest
+  end
+
+  opts.on('--extract DESTINATION', 'Extracts backups to specified destination') do |q|
+    options[:operation] = :extract
+    dest = File.expand_path(q)
+    raise "#{dest} does not exist" unless File.directory?(dest)
+    options[:destination] = dest
+  end
+
+  # Options
+  opts.separator 'Flags:'
+
+  opts.on('--raw', 'Creates a raw archive instead of renaming files', 'Use with --archive') do
+    options[:backup_type] = :raw
+  end
+
+  opts.on('--home', 'Only save the HomeDomain') do
+    backup_options[:name] = 'home'
+    backup_options[:domain_filter] = /HomeDomain/i
+  end
+
+  opts.on('--media', 'Only saves well know media locations') do
+    backup_options[:name] = 'media'
+    backup_options[:domain_filter] = /CameraRollDomain|MediaDomain|AppDomain-net\.whatsapp\.WhatsApp/i
+  end
+
+  opts.on('--password PASSWORD', 'Password for encrypted backups') do |q|
+    backup_options[:password] = q.to_s
+  end
+
+  opts.on('--serial SERIAL', 'Target a specific device by its serial number') do |q|
+    options[:serial_number] = q.to_s.strip
+  end
+
+  opts.on('-v', '--verbose', 'Verbose logging') do
+    NauktisUtils::Logging.logger.level = Logger::INFO
+  end
+
+  opts.on('--veryverbose', 'Very verbose logging') do
+    NauktisUtils::Logging.logger.level = Logger::DEBUG
+  end
+
+  opts.on('-h', '--help', 'Prints this help') do
+    puts opts
+    exit
+  end
+end.parse!
+
+if ARGV.size > 0
+  retreiver.search_in(ARGV[0])
+else
+  retreiver.search
+end
+
+backups = retreiver.backups.sort_by! { |b| b.info_plist.last_backup_date }
+# Only perform the action for the selected backup (or all)
+if options[:serial_number]
+  backups.select! { |b| b.info_plist.serial_number == options[:serial_number] }
+end
+
+backups.each do |backup|
+  case options[:operation]
+    when :list
+      puts backup
+    when :details
+      backup.info_plist.details
+      puts '-' * 40
+    when :extract
+      backup.extract_to(options[:destination], backup_options)
+    when :archive
+      if options[:backup_type] == 'raw'
+        backup.archive_raw(options[:destination], backup_options)
+      else
+        backup.archive_to(options[:destination], backup_options)
+      end
+  end
+end

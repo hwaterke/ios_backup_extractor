@@ -13,12 +13,15 @@ module IosBackupExtractor
       logger.debug('Retriever') {"Retrieving iDevice backup files in #{directory}."}
       NauktisUtils::FileBrowser.each_file(directory) do |path|
         if File.basename(path) == 'Info.plist'
-          infos = IosBackupExtractor.plist_to_hash(path)
-          continue unless infos.has_key? 'Product Version'
-          if infos['Product Version'][0] <= '3'
-            @backups << RawBackup3.new(File.dirname(path))
-          else
+          infos = InfoPlist.new(path)
+          continue unless infos.has? InfoPlist::PRODUCT_VERSION
+          major = infos.versions.first
+          if major <= 3
+            raise 'iOS 3 backups are not supported'
+          elsif major < 10
             @backups << RawBackup4.new(File.dirname(path))
+          else
+            @backups << RawBackup10.new(File.dirname(path))
           end
         end
       end
