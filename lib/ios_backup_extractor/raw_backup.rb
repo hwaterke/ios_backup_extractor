@@ -39,8 +39,8 @@ module IosBackupExtractor
       raise "Backup destination already exists. #{parent_directory}" if File.exist? parent_directory
       FileUtils.mkdir(parent_directory)
       logger.info(self.class.name) { "Starting backup extraction in directory #{parent_directory}" }
-      copy_files(destination_directory, options)
-      add_files_with_extensions(destination_directory)
+      copy_files(parent_directory, options)
+      add_files_with_extensions(parent_directory)
       logger.info(self.class.name) { "Backup extraction finished. #{IosBackupExtractor.file_count(parent_directory)} files extracted." }
       parent_directory
     end
