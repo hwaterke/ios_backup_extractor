@@ -10,7 +10,7 @@ module IosBackupExtractor
       # Grab a copy of the Manifest database
       manifest_dir = Dir.mktmpdir
       major, minor = info_plist.versions
-      if is_encrypted? and major >= 10 and minor >= 2
+      if is_encrypted? && (major > 10 || (major == 10 && minor >= 2))
         protection_class = @manifest_plist['ManifestKey'][0..3].unpack('V')[0]
         key = @keybag.unwrap_key_for_class(protection_class, @manifest_plist['ManifestKey'][4..-1])
         copy_enc_file_from_backup(MANIFEST_DB, File.join(manifest_dir, MANIFEST_DB), key)
