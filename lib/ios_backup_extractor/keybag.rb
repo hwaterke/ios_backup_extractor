@@ -9,6 +9,7 @@ module IosBackupExtractor
     def initialize(data, version_major, version_minor)
       @version_major = version_major
       @version_minor = version_minor
+      logger.debug(self.class.name) { "Keybag for backup of iOS #{@version_major}.#{@version_minor}" }
       parse_binary_blob(data)
     end
 
@@ -58,7 +59,7 @@ module IosBackupExtractor
     def get_passcode_key_from_passcode(password)
       raise 'This is not a backup/icloud keybag' unless @type == 1 or @type == 3
 
-      if @version_major == 10 && @version_minor < 2
+      if @version_major < 10 || (@version_major == 10 && @version_minor < 2)
         return OpenSSL::PKCS5.pbkdf2_hmac_sha1(password, @attributes['SALT'], @attributes['ITER'], 32)
       end
 
