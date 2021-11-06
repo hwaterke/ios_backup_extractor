@@ -19,31 +19,12 @@ module IosBackupExtractor
           continue unless should_include?(f[:domain], f[:file_path], options)
 
           destination = File.expand_path(File.join(destination_directory, f[:domain], f[:file_path]))
-          raise "File #{destination} already exists" if File.exists?(destination)
-
-          source = File.expand_path(File.join(@backup_directory, f[:file_id]))
-          raise "File #{source} doesn't exist in your backup source" unless File.exists?(source)
-
-          logger.debug(self.class.name) { "Extracting #{destination}" }
-          FileUtils.mkdir_p(File.dirname(destination))
 
           if not f[:encryption_key].nil? and not @keybag.nil?
             key = @keybag.unwrap_key_for_class(f[:protection_class], f[:encryption_key][4..-1])
-
-            cipher = OpenSSL::Cipher::AES256.new(:CBC)
-            cipher.decrypt
-            cipher.key = key
-            buf = ''
-            File.open(destination, 'wb') do |outf|
-              File.open(source, 'rb') do |inf|
-                while inf.read(4096, buf)
-                  outf << cipher.update(buf)
-                end
-                outf << cipher.final
-              end
-            end
+            copy_enc_file_from_backup(f[:file_id], destination, key)
           else
-            FileUtils.cp(source, destination)
+            copy_file_from_backup(f[:file_id], destination)
           end
         end
       end
