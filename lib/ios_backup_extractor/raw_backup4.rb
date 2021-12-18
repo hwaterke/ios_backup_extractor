@@ -5,6 +5,7 @@ module IosBackupExtractor
     private
 
     def load!(options = {})
+      raise 'This looks like a very old backup (iOS 3?)' unless @manifest_plist.has_key? 'BackupKeyBag'
       super(options)
       @mbdb = MBDB.new(File.join(@backup_directory, MANIFEST_MBDB))
     end

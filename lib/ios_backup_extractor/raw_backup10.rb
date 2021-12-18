@@ -5,6 +5,7 @@ module IosBackupExtractor
     private
 
     def load!(options = {})
+      raise 'This looks like a very old backup (iOS 3?)' unless @manifest_plist.has_key? 'BackupKeyBag'
       super(options)
 
       # Grab a copy of the Manifest database

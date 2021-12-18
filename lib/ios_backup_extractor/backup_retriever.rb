@@ -17,7 +17,7 @@ module IosBackupExtractor
           continue unless infos.has? InfoPlist::PRODUCT_VERSION
           major = infos.versions.first
           if major <= 3
-            raise 'iOS 3 backups are not supported'
+            @backups << RawBackup3.new(File.dirname(path))
           elsif major < 10
             @backups << RawBackup4.new(File.dirname(path))
           else

@@ -58,6 +58,10 @@ OptionParser.new do |opts|
     backup_options[:password] = q.to_s
   end
 
+  opts.on('--temp FOLDER', 'Folder to use for creating temp files') do |q|
+    backup_options[:temp_folder] = q.to_s
+  end
+
   opts.on('--serial SERIAL', 'Target a specific device by its serial number') do |q|
     options[:serial_number] = q.to_s.strip
   end

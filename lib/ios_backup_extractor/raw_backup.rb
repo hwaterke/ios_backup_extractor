@@ -9,7 +9,6 @@ module IosBackupExtractor
       @backup_directory = NauktisUtils::FileBrowser.ensure_valid_directory(backup_directory)
       @info_plist = InfoPlist.new(File.join(@backup_directory, INFO_PLIST))
       @manifest_plist = IosBackupExtractor.plist_file_to_hash(File.join(@backup_directory, MANIFEST_PLIST))
-      raise 'This looks like a very old backup (iOS 3?)' unless @manifest_plist.has_key? 'BackupKeyBag'
     end
 
     ##
